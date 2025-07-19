@@ -14,7 +14,7 @@ type mockRepo struct {
 	GetFunc        func(userID, serviceName string) (*domain.Subscription, error)
 	UpdateFunc     func(sub *domain.Subscription) error
 	DeleteFunc     func(userID, serviceName string) error
-	ListFunc       func(userID string, limit, offset int) ([]*domain.Subscription, error)
+	ListFunc       func(userID string, limit, offset int) ([]domain.Subscription, error)
 	TotalPriceFunc func(userID, serviceName string, from, to time.Time) (int, error)
 }
 
@@ -30,7 +30,7 @@ func (m *mockRepo) Update(sub *domain.Subscription) error {
 func (m *mockRepo) Delete(userID, serviceName string) error {
 	return m.DeleteFunc(userID, serviceName)
 }
-func (m *mockRepo) List(userID string, limit, offset int) ([]*domain.Subscription, error) {
+func (m *mockRepo) List(userID string, limit, offset int) ([]domain.Subscription, error) {
 	return m.ListFunc(userID, limit, offset)
 }
 func (m *mockRepo) TotalPrice(userID, serviceName string, from, to time.Time) (int, error) {
@@ -96,8 +96,8 @@ func TestUserSubscriptionService_Delete(t *testing.T) {
 
 func TestUserSubscriptionService_List(t *testing.T) {
 	repo := mockRepo{
-		ListFunc: func(userID string, limit, offset int) ([]*domain.Subscription, error) {
-			return []*domain.Subscription{{UserID: userID, ServiceName: "Netflix", Price: 100}}, nil
+		ListFunc: func(userID string, limit, offset int) ([]domain.Subscription, error) {
+			return []domain.Subscription{{UserID: userID, ServiceName: "Netflix", Price: 100}}, nil
 		},
 	}
 	svc := services.NewUserSubscriptionService(&repo)

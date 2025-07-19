@@ -20,7 +20,7 @@ type mockService struct {
 	GetFunc        func(userID, serviceName string) (*domain.Subscription, error)
 	UpdateFunc     func(sub *domain.Subscription) error
 	DeleteFunc     func(userID, serviceName string) error
-	ListFunc       func(userID string, limit, offset int) ([]*domain.Subscription, error)
+	ListFunc       func(userID string, limit, offset int) ([]domain.Subscription, error)
 	TotalPriceFunc func(userID, serviceName string, from, to time.Time) (int, error)
 }
 
@@ -36,7 +36,7 @@ func (m *mockService) Update(sub *domain.Subscription) error {
 func (m *mockService) Delete(userID, serviceName string) error {
 	return m.DeleteFunc(userID, serviceName)
 }
-func (m *mockService) List(userID string, limit, offset int) ([]*domain.Subscription, error) {
+func (m *mockService) List(userID string, limit, offset int) ([]domain.Subscription, error) {
 	return m.ListFunc(userID, limit, offset)
 }
 func (m *mockService) TotalPrice(userID, serviceName string, from, to time.Time) (int, error) {
@@ -93,8 +93,8 @@ func TestGetSubscription_NotFound(t *testing.T) {
 func TestListSubscriptions(t *testing.T) {
 	e := echo.New()
 	ms := &mockService{
-		ListFunc: func(userID string, limit, offset int) ([]*domain.Subscription, error) {
-			return []*domain.Subscription{{UserID: "550e8400-e29b-41d4-a716-446655440000", ServiceName: "Netflix", Price: 500, StartDate: domain.ShortDate{Time: time.Now()}}}, nil
+		ListFunc: func(userID string, limit, offset int) ([]domain.Subscription, error) {
+			return []domain.Subscription{{UserID: "550e8400-e29b-41d4-a716-446655440000", ServiceName: "Netflix", Price: 500, StartDate: domain.ShortDate{Time: time.Now()}}}, nil
 		},
 	}
 	h := handlers.NewSubscriptionsApiHandler(ms)

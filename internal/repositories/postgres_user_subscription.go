@@ -56,9 +56,9 @@ func (r *PostgresUserSubscriptionRepository) Delete(userID, serviceName string) 
 	return nil
 }
 
-func (r *PostgresUserSubscriptionRepository) List(userID string, limit, offset int) ([]*domain.Subscription, error) {
-	subs := []*domain.Subscription{}
-	err := r.db.Select(subs, `SELECT * FROM subscriptions WHERE user_id = $1 LIMIT $2 OFFSET $3`, userID, limit, offset)
+func (r *PostgresUserSubscriptionRepository) List(userID string, limit, offset int) ([]domain.Subscription, error) {
+	subs := make([]domain.Subscription, 0, limit)
+	err := r.db.Select(&subs, `SELECT * FROM subscriptions WHERE user_id = $1 LIMIT $2 OFFSET $3`, userID, limit, offset)
 	if err != nil {
 		return nil, fmt.Errorf("failed to list subscriptions: %w", err)
 	}

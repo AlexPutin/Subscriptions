@@ -32,7 +32,7 @@ func (s *userSubscriptionService) Delete(userID, serviceName string) error {
 	return s.repo.Delete(userID, serviceName)
 }
 
-func (s *userSubscriptionService) List(userID string, limit, offset int) ([]*domain.Subscription, error) {
+func (s *userSubscriptionService) List(userID string, limit, offset int) ([]domain.Subscription, error) {
 	return s.repo.List(userID, limit, offset)
 }
 
