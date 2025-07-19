@@ -1,10 +1,11 @@
-package services
+package services_test
 
 import (
 	"testing"
 	"time"
 
 	"github.com/alexputin/subscriptions/internal/domain"
+	"github.com/alexputin/subscriptions/internal/services"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -36,17 +37,6 @@ func (m *mockRepo) TotalPrice(userID, serviceName string, from, to time.Time) (i
 	return m.TotalPriceFunc(userID, serviceName, from, to)
 }
 
-func TestUserSubscriptionService_Create_Validation(t *testing.T) {
-	repo := mockRepo{
-		CreateFunc: func(sub *domain.Subscription) error { return nil },
-	}
-	svc := NewUserSubscriptionService(&repo)
-	sub := domain.Subscription{UserID: "", ServiceName: "Netflix", Price: 500, StartDate: time.Now()}
-	err := svc.Create(&sub)
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "validation failed")
-}
-
 func TestUserSubscriptionService_Create_Ok(t *testing.T) {
 	called := false
 	repo := mockRepo{
@@ -55,22 +45,11 @@ func TestUserSubscriptionService_Create_Ok(t *testing.T) {
 			return nil
 		},
 	}
-	svc := NewUserSubscriptionService(&repo)
+	svc := services.NewUserSubscriptionService(&repo)
 	sub := domain.Subscription{UserID: "user1", ServiceName: "Netflix", Price: 500, StartDate: time.Now()}
 	err := svc.Create(&sub)
 	assert.NoError(t, err)
 	assert.True(t, called)
-}
-
-func TestUserSubscriptionService_Update_Validation(t *testing.T) {
-	repo := mockRepo{
-		UpdateFunc: func(sub *domain.Subscription) error { return nil },
-	}
-	svc := NewUserSubscriptionService(&repo)
-	sub := domain.Subscription{UserID: "user1", ServiceName: "", Price: 500, StartDate: time.Now()}
-	err := svc.Update(&sub)
-	assert.Error(t, err)
-	assert.Contains(t, err.Error(), "validation failed")
 }
 
 func TestUserSubscriptionService_Update_Ok(t *testing.T) {
@@ -81,7 +60,7 @@ func TestUserSubscriptionService_Update_Ok(t *testing.T) {
 			return nil
 		},
 	}
-	svc := NewUserSubscriptionService(&repo)
+	svc := services.NewUserSubscriptionService(&repo)
 	sub := domain.Subscription{UserID: "user1", ServiceName: "Netflix", Price: 500, StartDate: time.Now()}
 	err := svc.Update(&sub)
 	assert.NoError(t, err)
@@ -94,7 +73,7 @@ func TestUserSubscriptionService_Get(t *testing.T) {
 			return &domain.Subscription{UserID: userID, ServiceName: serviceName, Price: 100}, nil
 		},
 	}
-	svc := NewUserSubscriptionService(&repo)
+	svc := services.NewUserSubscriptionService(&repo)
 	sub, err := svc.Get("user1", "Netflix")
 	assert.NoError(t, err)
 	assert.Equal(t, "user1", sub.UserID)
@@ -109,7 +88,7 @@ func TestUserSubscriptionService_Delete(t *testing.T) {
 			return nil
 		},
 	}
-	svc := NewUserSubscriptionService(&repo)
+	svc := services.NewUserSubscriptionService(&repo)
 	err := svc.Delete("user1", "Netflix")
 	assert.NoError(t, err)
 	assert.True(t, called)
@@ -121,7 +100,7 @@ func TestUserSubscriptionService_List(t *testing.T) {
 			return []*domain.Subscription{{UserID: userID, ServiceName: "Netflix", Price: 100}}, nil
 		},
 	}
-	svc := NewUserSubscriptionService(&repo)
+	svc := services.NewUserSubscriptionService(&repo)
 	list, err := svc.List("user1", 10, 0)
 	assert.NoError(t, err)
 	assert.Len(t, list, 1)
@@ -134,7 +113,7 @@ func TestUserSubscriptionService_TotalPrice(t *testing.T) {
 			return 1234, nil
 		},
 	}
-	svc := NewUserSubscriptionService(&repo)
+	svc := services.NewUserSubscriptionService(&repo)
 	total, err := svc.TotalPrice("user1", "Netflix", time.Now(), time.Now())
 	assert.NoError(t, err)
 	assert.Equal(t, 1234, total)

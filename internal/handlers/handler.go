@@ -2,23 +2,26 @@ package handlers
 
 import (
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/alexputin/subscriptions/internal/domain"
 	"github.com/alexputin/subscriptions/internal/utils"
+	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
 )
 
 type subscriptionsApiHandler struct {
-	service domain.UserSubscriptionService
+	service  domain.UserSubscriptionService
+	validate *validator.Validate
 }
 
 func NewSubscriptionsApiHandler(service domain.UserSubscriptionService) *subscriptionsApiHandler {
 	return &subscriptionsApiHandler{
-		service: service,
+		service:  service,
+		validate: validator.New(),
 	}
 }
 
@@ -39,6 +42,12 @@ func (h *subscriptionsApiHandler) CreateSubscription(c echo.Context) error {
 		utils.ResponseError(c, http.StatusBadRequest, err)
 		return nil
 	}
+
+	if err := h.validate.Struct(req); err != nil {
+		utils.ResponseError(c, http.StatusBadRequest, fmt.Errorf("validation failed: %w", err))
+		return nil
+	}
+
 	sub := domain.Subscription{
 		UserID:      req.UserID,
 		ServiceName: req.ServiceName,
@@ -46,12 +55,9 @@ func (h *subscriptionsApiHandler) CreateSubscription(c echo.Context) error {
 		StartDate:   req.StartDate,
 		EndDate:     req.EndDate,
 	}
+
 	err := h.service.Create(&sub)
 	if err != nil {
-		if strings.Contains(err.Error(), "validation failed") {
-			utils.ResponseError(c, http.StatusBadRequest, err)
-			return nil
-		}
 		utils.ResponseError(c, http.StatusInternalServerError, err)
 		return nil
 	}
@@ -121,19 +127,22 @@ func (h *subscriptionsApiHandler) UpdateSubscription(c echo.Context) error {
 		utils.ResponseError(c, http.StatusBadRequest, err)
 		return nil
 	}
+
+	if err := h.validate.Struct(req); err != nil {
+		utils.ResponseError(c, http.StatusBadRequest, fmt.Errorf("validation failed: %w", err))
+		return nil
+	}
+
 	sub := domain.Subscription{
 		UserID:      userID,
 		ServiceName: serviceName,
 		Price:       req.Price,
 		StartDate:   req.StartDate,
-		EndDate:     req.EndDate,
+		EndDate:     &req.StartDate,
 	}
+
 	err := h.service.Update(&sub)
 	if err != nil {
-		if strings.Contains(err.Error(), "validation failed") {
-			utils.ResponseError(c, http.StatusBadRequest, err)
-			return nil
-		}
 		utils.ResponseError(c, http.StatusInternalServerError, err)
 		return nil
 	}

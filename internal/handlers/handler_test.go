@@ -56,7 +56,7 @@ func TestCreateSubscription(t *testing.T) {
 	h := handlers.NewSubscriptionsApiHandler(ms)
 
 	body := map[string]interface{}{
-		"user_id":      "user1",
+		"user_id":      "550e8400-e29b-41d4-a716-446655440000",
 		"service_name": "Netflix",
 		"price":        500,
 		"start_date":   "2025-07-01T00:00:00Z",
@@ -79,11 +79,12 @@ func TestGetSubscription_NotFound(t *testing.T) {
 		},
 	}
 	h := handlers.NewSubscriptionsApiHandler(ms)
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/subscriptions/user1/Netflix", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/subscriptions/550e8400-e29b-41d4-a716-446655440000/Netflix", nil)
 	w := httptest.NewRecorder()
 	c := e.NewContext(req, w)
+
 	c.SetParamNames("user_id", "service_name")
-	c.SetParamValues("user1", "Netflix")
+	c.SetParamValues("550e8400-e29b-41d4-a716-446655440000", "Netflix")
 
 	_ = h.GetSubscription(c)
 	assert.Equal(t, http.StatusNotFound, w.Code)
@@ -93,11 +94,11 @@ func TestListSubscriptions(t *testing.T) {
 	e := echo.New()
 	ms := &mockService{
 		ListFunc: func(userID string, limit, offset int) ([]*domain.Subscription, error) {
-			return []*domain.Subscription{{UserID: "user1", ServiceName: "Netflix", Price: 500, StartDate: time.Now()}}, nil
+			return []*domain.Subscription{{UserID: "550e8400-e29b-41d4-a716-446655440000", ServiceName: "Netflix", Price: 500, StartDate: time.Now()}}, nil
 		},
 	}
 	h := handlers.NewSubscriptionsApiHandler(ms)
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/subscriptions?user_id=user1", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/subscriptions?user_id=550e8400-e29b-41d4-a716-446655440000", nil)
 	w := httptest.NewRecorder()
 	c := e.NewContext(req, w)
 
@@ -113,7 +114,7 @@ func TestTotalPrice(t *testing.T) {
 		},
 	}
 	h := handlers.NewSubscriptionsApiHandler(ms)
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/subscriptions/total?user_id=user1&from=2025-01&to=2025-12", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/subscriptions/total?user_id=550e8400-e29b-41d4-a716-446655440000&from=2025-01&to=2025-12", nil)
 	w := httptest.NewRecorder()
 	c := e.NewContext(req, w)
 
@@ -137,12 +138,13 @@ func TestUpdateSubscription(t *testing.T) {
 		"start_date": "2025-07-01T00:00:00Z",
 	}
 	b, _ := json.Marshal(body)
-	req := httptest.NewRequest(http.MethodPut, "/api/v1/subscriptions/user1/Netflix", bytes.NewReader(b))
+	req := httptest.NewRequest(http.MethodPut, "/api/v1/subscriptions/550e8400-e29b-41d4-a716-446655440000/Netflix", bytes.NewReader(b))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	w := httptest.NewRecorder()
 	c := e.NewContext(req, w)
+	// Use valid UUID for user_id
 	c.SetParamNames("user_id", "service_name")
-	c.SetParamValues("user1", "Netflix")
+	c.SetParamValues("550e8400-e29b-41d4-a716-446655440000", "Netflix")
 
 	_ = h.UpdateSubscription(c)
 	assert.Equal(t, http.StatusOK, w.Code)
@@ -161,12 +163,13 @@ func TestUpdateSubscription_Error(t *testing.T) {
 		"start_date": "2025-07-01T00:00:00Z",
 	}
 	b, _ := json.Marshal(body)
-	req := httptest.NewRequest(http.MethodPut, "/api/v1/subscriptions/user1/Netflix", bytes.NewReader(b))
+	req := httptest.NewRequest(http.MethodPut, "/api/v1/subscriptions/550e8400-e29b-41d4-a716-446655440000/Netflix", bytes.NewReader(b))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	w := httptest.NewRecorder()
 	c := e.NewContext(req, w)
+	// Use valid UUID for user_id
 	c.SetParamNames("user_id", "service_name")
-	c.SetParamValues("user1", "Netflix")
+	c.SetParamValues("550e8400-e29b-41d4-a716-446655440000", "Netflix")
 
 	_ = h.UpdateSubscription(c)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
@@ -183,11 +186,12 @@ func TestDeleteSubscription(t *testing.T) {
 		},
 	}
 	h := handlers.NewSubscriptionsApiHandler(ms)
-	req := httptest.NewRequest(http.MethodDelete, "/api/v1/subscriptions/user1/Netflix", nil)
+	req := httptest.NewRequest(http.MethodDelete, "/api/v1/subscriptions/550e8400-e29b-41d4-a716-446655440000/Netflix", nil)
 	w := httptest.NewRecorder()
 	c := e.NewContext(req, w)
+	// Use valid UUID for user_id
 	c.SetParamNames("user_id", "service_name")
-	c.SetParamValues("user1", "Netflix")
+	c.SetParamValues("550e8400-e29b-41d4-a716-446655440000", "Netflix")
 
 	_ = h.DeleteSubscription(c)
 	assert.Equal(t, http.StatusNoContent, w.Code)
@@ -201,11 +205,12 @@ func TestDeleteSubscription_Error(t *testing.T) {
 		},
 	}
 	h := handlers.NewSubscriptionsApiHandler(ms)
-	req := httptest.NewRequest(http.MethodDelete, "/api/v1/subscriptions/user1/Netflix", nil)
+	req := httptest.NewRequest(http.MethodDelete, "/api/v1/subscriptions/550e8400-e29b-41d4-a716-446655440000/Netflix", nil)
 	w := httptest.NewRecorder()
 	c := e.NewContext(req, w)
+	// Use valid UUID for user_id
 	c.SetParamNames("user_id", "service_name")
-	c.SetParamValues("user1", "Netflix")
+	c.SetParamValues("550e8400-e29b-41d4-a716-446655440000", "Netflix")
 
 	_ = h.DeleteSubscription(c)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
@@ -215,10 +220,11 @@ func TestCreateSubscription_ValidationError(t *testing.T) {
 	e := echo.New()
 	ms := &mockService{
 		CreateFunc: func(sub *domain.Subscription) error {
-			return errors.New("validation failed: user_id is required")
+			return nil
 		},
 	}
 	h := handlers.NewSubscriptionsApiHandler(ms)
+	// Missing user_id (required)
 	body := map[string]interface{}{
 		"service_name": "Netflix",
 		"price":        500,
@@ -238,21 +244,37 @@ func TestUpdateSubscription_ValidationError(t *testing.T) {
 	e := echo.New()
 	ms := &mockService{
 		UpdateFunc: func(sub *domain.Subscription) error {
-			return errors.New("validation failed: price is required")
+			return nil
 		},
 	}
 	h := handlers.NewSubscriptionsApiHandler(ms)
+	// Missing price (required)
 	body := map[string]interface{}{
 		"start_date": "2025-07-01T00:00:00Z",
 	}
 	b, _ := json.Marshal(body)
-	req := httptest.NewRequest(http.MethodPut, "/api/v1/subscriptions/user1/Netflix", bytes.NewReader(b))
+	req := httptest.NewRequest(http.MethodPut, "/api/v1/subscriptions/550e8400-e29b-41d4-a716-446655440000/Netflix", bytes.NewReader(b))
 	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 	w := httptest.NewRecorder()
 	c := e.NewContext(req, w)
 	c.SetParamNames("user_id", "service_name")
-	c.SetParamValues("user1", "Netflix")
+	c.SetParamValues("550e8400-e29b-41d4-a716-446655440000", "Netflix")
 
 	_ = h.UpdateSubscription(c)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+func TestTotalPrice_InvalidDateFormat(t *testing.T) {
+	e := echo.New()
+	ms := &mockService{
+		TotalPriceFunc: func(userID, serviceName string, from, to time.Time) (int, error) {
+			return 0, nil
+		},
+	}
+	h := handlers.NewSubscriptionsApiHandler(ms)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/subscriptions/total?user_id=550e8400-e29b-41d4-a716-446655440000&from=2025-13&to=2025-12", nil)
+	w := httptest.NewRecorder()
+	c := e.NewContext(req, w)
+
+	_ = h.TotalPrice(c)
 	assert.Equal(t, http.StatusBadRequest, w.Code)
 }
