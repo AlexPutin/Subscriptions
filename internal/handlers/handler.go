@@ -35,8 +35,6 @@ func (h *subscriptionsApiHandler) RegisterRoutes(app *echo.Echo) {
 	group.GET("/subscriptions/total", h.TotalPrice)
 }
 
-// CreateSubscription handles POST /subscriptions
-func (h *subscriptionsApiHandler) CreateSubscription(c echo.Context) error {
 // CreateSubscription godoc
 // @Summary Create a new subscription
 // @Description Create a new subscription for a user
@@ -48,6 +46,7 @@ func (h *subscriptionsApiHandler) CreateSubscription(c echo.Context) error {
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Router /api/v1/subscriptions [post]
+func (h *subscriptionsApiHandler) CreateSubscription(c echo.Context) error {
 	var req SubscriptionCreateReq
 	if err := c.Bind(&req); err != nil {
 		utils.ResponseError(c, http.StatusBadRequest, err)
@@ -76,8 +75,6 @@ func (h *subscriptionsApiHandler) CreateSubscription(c echo.Context) error {
 	return c.JSON(http.StatusCreated, res)
 }
 
-// ListSubscriptions handles GET /subscriptions
-func (h *subscriptionsApiHandler) ListSubscriptions(c echo.Context) error {
 // ListSubscriptions godoc
 // @Summary List subscriptions
 // @Description List subscriptions for a user
@@ -91,6 +88,7 @@ func (h *subscriptionsApiHandler) ListSubscriptions(c echo.Context) error {
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Router /api/v1/subscriptions [get]
+func (h *subscriptionsApiHandler) ListSubscriptions(c echo.Context) error {
 	userID := c.QueryParam("user_id")
 	if userID == "" {
 		utils.ResponseError(c, http.StatusBadRequest, errors.New("missing user_id"))
@@ -129,8 +127,6 @@ func (h *subscriptionsApiHandler) ListSubscriptions(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-// GetSubscription handles GET /subscriptions/:user_id/:service_name
-func (h *subscriptionsApiHandler) GetSubscription(c echo.Context) error {
 // GetSubscription godoc
 // @Summary Get a subscription
 // @Description Get a subscription by user ID and service name
@@ -144,6 +140,7 @@ func (h *subscriptionsApiHandler) GetSubscription(c echo.Context) error {
 // @Failure 404 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Router /api/v1/subscriptions/{user_id}/{service_name} [get]
+func (h *subscriptionsApiHandler) GetSubscription(c echo.Context) error {
 	userID := c.Param("user_id")
 	serviceName := c.Param("service_name")
 	if userID == "" || serviceName == "" {
@@ -163,8 +160,6 @@ func (h *subscriptionsApiHandler) GetSubscription(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-// UpdateSubscription handles PUT /subscriptions/:user_id/:service_name
-func (h *subscriptionsApiHandler) UpdateSubscription(c echo.Context) error {
 // UpdateSubscription godoc
 // @Summary Update a subscription
 // @Description Update a subscription by user ID and service name
@@ -178,6 +173,7 @@ func (h *subscriptionsApiHandler) UpdateSubscription(c echo.Context) error {
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Router /api/v1/subscriptions/{user_id}/{service_name} [put]
+func (h *subscriptionsApiHandler) UpdateSubscription(c echo.Context) error {
 	userID := c.Param("user_id")
 	serviceName := c.Param("service_name")
 	if userID == "" || serviceName == "" {
@@ -212,8 +208,6 @@ func (h *subscriptionsApiHandler) UpdateSubscription(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-// DeleteSubscription handles DELETE /subscriptions/:user_id/:service_name
-func (h *subscriptionsApiHandler) DeleteSubscription(c echo.Context) error {
 // DeleteSubscription godoc
 // @Summary Delete a subscription
 // @Description Delete a subscription by user ID and service name
@@ -226,6 +220,7 @@ func (h *subscriptionsApiHandler) DeleteSubscription(c echo.Context) error {
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Router /api/v1/subscriptions/{user_id}/{service_name} [delete]
+func (h *subscriptionsApiHandler) DeleteSubscription(c echo.Context) error {
 	userID := c.Param("user_id")
 	serviceName := c.Param("service_name")
 	if userID == "" || serviceName == "" {
@@ -240,8 +235,6 @@ func (h *subscriptionsApiHandler) DeleteSubscription(c echo.Context) error {
 	return c.NoContent(http.StatusNoContent)
 }
 
-// TotalPrice handles GET /subscriptions/total
-func (h *subscriptionsApiHandler) TotalPrice(c echo.Context) error {
 // TotalPrice godoc
 // @Summary Get total price
 // @Description Get total price for a user's subscriptions in a date range
@@ -250,12 +243,13 @@ func (h *subscriptionsApiHandler) TotalPrice(c echo.Context) error {
 // @Produce json
 // @Param user_id query string true "User ID"
 // @Param service_name query string false "Service Name"
-// @Param from query string true "From date (YYYY-MM)"
-// @Param to query string true "To date (YYYY-MM)"
+// @Param from query string true "From date (MM-YYYY)"
+// @Param to query string true "To date (MM-YYYY)"
 // @Success 200 {object} TotalPriceRes
 // @Failure 400 {object} utils.ErrorResponse
 // @Failure 500 {object} utils.ErrorResponse
 // @Router /api/v1/subscriptions/total [get]
+func (h *subscriptionsApiHandler) TotalPrice(c echo.Context) error {
 	userID := c.QueryParam("user_id")
 	serviceName := c.QueryParam("service_name")
 	fromStr := c.QueryParam("from")
@@ -266,12 +260,12 @@ func (h *subscriptionsApiHandler) TotalPrice(c echo.Context) error {
 	}
 	from, err := parseYearMonth(fromStr)
 	if err != nil {
-		utils.ResponseError(c, http.StatusBadRequest, errors.New("invalid from date format, expected YYYY-MM"))
+		utils.ResponseError(c, http.StatusBadRequest, errors.New("invalid from date format, expected MM-YYYY"))
 		return nil
 	}
 	to, err := parseYearMonth(toStr)
 	if err != nil {
-		utils.ResponseError(c, http.StatusBadRequest, errors.New("invalid to date format, expected YYYY-MM"))
+		utils.ResponseError(c, http.StatusBadRequest, errors.New("invalid to date format, expected MM-YYYY"))
 		return nil
 	}
 	total, err := h.service.TotalPrice(userID, serviceName, from, to)

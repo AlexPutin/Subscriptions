@@ -1,0 +1,289 @@
+definitions:
+  handlers.SubscriptionCreateReq:
+    properties:
+      end_date:
+        example: 07-2025
+        type: string
+      price:
+        minimum: 0
+        type: integer
+      service_name:
+        maxLength: 255
+        minLength: 2
+        type: string
+      start_date:
+        example: 07-2025
+        type: string
+      user_id:
+        type: string
+    required:
+    - price
+    - service_name
+    - start_date
+    - user_id
+    type: object
+  handlers.SubscriptionRes:
+    properties:
+      end_date:
+        example: 07-2025
+        type: string
+      price:
+        type: integer
+      service_name:
+        type: string
+      start_date:
+        example: 07-2025
+        type: string
+      user_id:
+        type: string
+    type: object
+  handlers.SubscriptionUpdateReq:
+    properties:
+      end_date:
+        example: 07-2025
+        type: string
+      price:
+        minimum: 0
+        type: integer
+      start_date:
+        example: 07-2025
+        type: string
+    required:
+    - price
+    - start_date
+    type: object
+  handlers.TotalPriceRes:
+    properties:
+      total:
+        type: integer
+    type: object
+  utils.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+info:
+  contact: {}
+paths:
+  /api/v1/subscriptions:
+    get:
+      consumes:
+      - application/json
+      description: List subscriptions for a user
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: string
+      - description: Limit
+        in: query
+        name: limit
+        type: integer
+      - description: Offset
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/handlers.SubscriptionRes'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: List subscriptions
+      tags:
+      - subscriptions
+    post:
+      consumes:
+      - application/json
+      description: Create a new subscription for a user
+      parameters:
+      - description: Subscription to create
+        in: body
+        name: subscription
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.SubscriptionCreateReq'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/handlers.SubscriptionRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Create a new subscription
+      tags:
+      - subscriptions
+  /api/v1/subscriptions/{user_id}/{service_name}:
+    delete:
+      consumes:
+      - application/json
+      description: Delete a subscription by user ID and service name
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: Service Name
+        in: path
+        name: service_name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+          schema:
+            type: string
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Delete a subscription
+      tags:
+      - subscriptions
+    get:
+      consumes:
+      - application/json
+      description: Get a subscription by user ID and service name
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: Service Name
+        in: path
+        name: service_name
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.SubscriptionRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get a subscription
+      tags:
+      - subscriptions
+    put:
+      consumes:
+      - application/json
+      description: Update a subscription by user ID and service name
+      parameters:
+      - description: User ID
+        in: path
+        name: user_id
+        required: true
+        type: string
+      - description: Service Name
+        in: path
+        name: service_name
+        required: true
+        type: string
+      - description: Subscription update
+        in: body
+        name: subscription
+        required: true
+        schema:
+          $ref: '#/definitions/handlers.SubscriptionUpdateReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.SubscriptionRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Update a subscription
+      tags:
+      - subscriptions
+  /api/v1/subscriptions/total:
+    get:
+      consumes:
+      - application/json
+      description: Get total price for a user's subscriptions in a date range
+      parameters:
+      - description: User ID
+        in: query
+        name: user_id
+        required: true
+        type: string
+      - description: Service Name
+        in: query
+        name: service_name
+        type: string
+      - description: From date (MM-YYYY)
+        in: query
+        name: from
+        required: true
+        type: string
+      - description: To date (MM-YYYY)
+        in: query
+        name: to
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/handlers.TotalPriceRes'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/utils.ErrorResponse'
+      summary: Get total price
+      tags:
+      - subscriptions
+swagger: "2.0"

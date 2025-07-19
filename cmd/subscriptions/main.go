@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/signal"
 
+	_ "github.com/alexputin/subscriptions/docs"
 	"github.com/alexputin/subscriptions/internal/config"
 	"github.com/alexputin/subscriptions/internal/db"
 	"github.com/alexputin/subscriptions/internal/handlers"
@@ -14,6 +15,7 @@ import (
 	"github.com/alexputin/subscriptions/internal/services"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	echoSwagger "github.com/swaggo/echo-swagger"
 )
 
 func main() {
@@ -42,6 +44,7 @@ func main() {
 	// Register routes
 	api := handlers.NewSubscriptionsApiHandler(service)
 	api.RegisterRoutes(app)
+	app.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// Server graceful shutdown
 	go func() {
