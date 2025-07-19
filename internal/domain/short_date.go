@@ -14,7 +14,7 @@ func (st ShortDate) MarshalJSON() ([]byte, error) {
 	if st.IsZero() {
 		return []byte("null"), nil
 	}
-	return []byte(`"01-2006"`), nil
+	return []byte(st.Format(`"01-2006"`)), nil
 }
 
 func (st *ShortDate) UnmarshalJSON(data []byte) error {

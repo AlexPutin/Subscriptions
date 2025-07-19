@@ -102,19 +102,20 @@ func (h *subscriptionsApiHandler) ListSubscriptions(c echo.Context) error {
 			limit = v
 		}
 	}
+
 	if o := c.QueryParam("offset"); o != "" {
 		if v, err := strconv.Atoi(o); err == nil && v >= 0 {
 			offset = v
 		}
 	}
+
 	subs, err := h.service.List(userID, limit, offset)
-	fmt.Println("Subs:", subs)
 	if err != nil {
 		utils.ResponseError(c, http.StatusInternalServerError, err)
 		return nil
 	}
-	res := make([]SubscriptionRes, len(subs))
 
+	res := make([]SubscriptionRes, len(subs))
 	for i, s := range subs {
 		res[i] = SubscriptionRes{
 			UserID:      s.UserID,
@@ -124,6 +125,7 @@ func (h *subscriptionsApiHandler) ListSubscriptions(c echo.Context) error {
 			EndDate:     s.EndDate,
 		}
 	}
+
 	return c.JSON(http.StatusOK, res)
 }
 
@@ -277,7 +279,7 @@ func (h *subscriptionsApiHandler) TotalPrice(c echo.Context) error {
 	return c.JSON(http.StatusOK, res)
 }
 
-// parseYearMonth parses a string in YYYY-MM format to time.Time (first day of month)
-func parseYearMonth(s string) (t time.Time, err error) {
+// parseYearMonth parses a string in MM-YYYY format to time.Time (first day of month)
+func parseYearMonth(s string) (time.Time, error) {
 	return time.Parse("01-2006", s)
 }
