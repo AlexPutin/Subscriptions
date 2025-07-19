@@ -59,7 +59,7 @@ func TestCreateSubscription(t *testing.T) {
 		"user_id":      "550e8400-e29b-41d4-a716-446655440000",
 		"service_name": "Netflix",
 		"price":        500,
-		"start_date":   "2025-07-01T00:00:00Z",
+		"start_date":   "07-2025",
 	}
 	b, _ := json.Marshal(body)
 	req := httptest.NewRequest(http.MethodPost, "/api/v1/subscriptions", bytes.NewReader(b))
@@ -94,7 +94,7 @@ func TestListSubscriptions(t *testing.T) {
 	e := echo.New()
 	ms := &mockService{
 		ListFunc: func(userID string, limit, offset int) ([]*domain.Subscription, error) {
-			return []*domain.Subscription{{UserID: "550e8400-e29b-41d4-a716-446655440000", ServiceName: "Netflix", Price: 500, StartDate: time.Now()}}, nil
+			return []*domain.Subscription{{UserID: "550e8400-e29b-41d4-a716-446655440000", ServiceName: "Netflix", Price: 500, StartDate: domain.ShortDate{Time: time.Now()}}}, nil
 		},
 	}
 	h := handlers.NewSubscriptionsApiHandler(ms)
@@ -135,7 +135,7 @@ func TestUpdateSubscription(t *testing.T) {
 	h := handlers.NewSubscriptionsApiHandler(ms)
 	body := map[string]interface{}{
 		"price":      600,
-		"start_date": "2025-07-01T00:00:00Z",
+		"start_date": "07-2025",
 	}
 	b, _ := json.Marshal(body)
 	req := httptest.NewRequest(http.MethodPut, "/api/v1/subscriptions/550e8400-e29b-41d4-a716-446655440000/Netflix", bytes.NewReader(b))
@@ -160,7 +160,7 @@ func TestUpdateSubscription_Error(t *testing.T) {
 	h := handlers.NewSubscriptionsApiHandler(ms)
 	body := map[string]interface{}{
 		"price":      600,
-		"start_date": "2025-07-01T00:00:00Z",
+		"start_date": "07-2025",
 	}
 	b, _ := json.Marshal(body)
 	req := httptest.NewRequest(http.MethodPut, "/api/v1/subscriptions/550e8400-e29b-41d4-a716-446655440000/Netflix", bytes.NewReader(b))

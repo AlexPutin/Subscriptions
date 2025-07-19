@@ -46,7 +46,7 @@ func TestUserSubscriptionService_Create_Ok(t *testing.T) {
 		},
 	}
 	svc := services.NewUserSubscriptionService(&repo)
-	sub := domain.Subscription{UserID: "user1", ServiceName: "Netflix", Price: 500, StartDate: time.Now()}
+	sub := domain.Subscription{UserID: "user1", ServiceName: "Netflix", Price: 500, StartDate: domain.ShortDate{Time: time.Now()}}
 	err := svc.Create(&sub)
 	assert.NoError(t, err)
 	assert.True(t, called)
@@ -61,7 +61,7 @@ func TestUserSubscriptionService_Update_Ok(t *testing.T) {
 		},
 	}
 	svc := services.NewUserSubscriptionService(&repo)
-	sub := domain.Subscription{UserID: "user1", ServiceName: "Netflix", Price: 500, StartDate: time.Now()}
+	sub := domain.Subscription{UserID: "user1", ServiceName: "Netflix", Price: 500, StartDate: domain.ShortDate{Time: time.Now()}}
 	err := svc.Update(&sub)
 	assert.NoError(t, err)
 	assert.True(t, called)
