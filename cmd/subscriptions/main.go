@@ -38,7 +38,7 @@ func main() {
 	app.Use(middleware.Recover())
 
 	// Register routes
-	api := handlers.NewExchangeApiHandler(nil) // TODO: Replace nil with actual repository implementation
+	api := handlers.NewSubscriptionsApiHandler(nil) // TODO: Replace nil with actual repository implementation
 	api.RegisterRoutes(app)
 
 	// Server graceful shutdown
