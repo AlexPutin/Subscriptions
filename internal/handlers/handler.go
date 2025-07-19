@@ -4,6 +4,7 @@ import (
 	"errors"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/alexputin/subscriptions/internal/domain"
@@ -33,21 +34,29 @@ func (h *subscriptionsApiHandler) RegisterRoutes(app *echo.Echo) {
 
 // CreateSubscription handles POST /subscriptions
 func (h *subscriptionsApiHandler) CreateSubscription(c echo.Context) error {
-	var req domain.Subscription
+	var req SubscriptionCreateReq
 	if err := c.Bind(&req); err != nil {
 		utils.ResponseError(c, http.StatusBadRequest, err)
 		return nil
 	}
-	if req.UserID == "" || req.ServiceName == "" || req.Price <= 0 || req.StartDate.IsZero() {
-		utils.ResponseError(c, http.StatusBadRequest, errors.New("missing required fields"))
-		return nil
+	sub := domain.Subscription{
+		UserID:      req.UserID,
+		ServiceName: req.ServiceName,
+		Price:       req.Price,
+		StartDate:   req.StartDate,
+		EndDate:     req.EndDate,
 	}
-	err := h.service.Create(&req)
+	err := h.service.Create(&sub)
 	if err != nil {
+		if strings.Contains(err.Error(), "validation failed") {
+			utils.ResponseError(c, http.StatusBadRequest, err)
+			return nil
+		}
 		utils.ResponseError(c, http.StatusInternalServerError, err)
 		return nil
 	}
-	return c.JSON(http.StatusCreated, req)
+	res := SubscriptionRes(sub)
+	return c.JSON(http.StatusCreated, res)
 }
 
 // ListSubscriptions handles GET /subscriptions
@@ -70,7 +79,12 @@ func (h *subscriptionsApiHandler) ListSubscriptions(c echo.Context) error {
 		utils.ResponseError(c, http.StatusInternalServerError, err)
 		return nil
 	}
-	return c.JSON(http.StatusOK, subs)
+	res := make([]SubscriptionRes, len(subs))
+
+	for i, s := range subs {
+		res[i] = SubscriptionRes(*s)
+	}
+	return c.JSON(http.StatusOK, res)
 }
 
 // GetSubscription handles GET /subscriptions/:user_id/:service_name
@@ -90,7 +104,8 @@ func (h *subscriptionsApiHandler) GetSubscription(c echo.Context) error {
 		utils.ResponseError(c, http.StatusNotFound, errors.New("subscription not found"))
 		return nil
 	}
-	return c.JSON(http.StatusOK, sub)
+	res := SubscriptionRes(*sub)
+	return c.JSON(http.StatusOK, res)
 }
 
 // UpdateSubscription handles PUT /subscriptions/:user_id/:service_name
@@ -101,24 +116,29 @@ func (h *subscriptionsApiHandler) UpdateSubscription(c echo.Context) error {
 		utils.ResponseError(c, http.StatusBadRequest, errors.New("missing user_id or service_name"))
 		return nil
 	}
-	var req domain.Subscription
+	var req SubscriptionUpdateReq
 	if err := c.Bind(&req); err != nil {
 		utils.ResponseError(c, http.StatusBadRequest, err)
 		return nil
 	}
-	// userID и serviceName из URL имеют приоритет
-	req.UserID = userID
-	req.ServiceName = serviceName
-	if req.Price <= 0 || req.StartDate.IsZero() {
-		utils.ResponseError(c, http.StatusBadRequest, errors.New("missing required fields"))
-		return nil
+	sub := domain.Subscription{
+		UserID:      userID,
+		ServiceName: serviceName,
+		Price:       req.Price,
+		StartDate:   req.StartDate,
+		EndDate:     req.EndDate,
 	}
-	err := h.service.Update(&req)
+	err := h.service.Update(&sub)
 	if err != nil {
+		if strings.Contains(err.Error(), "validation failed") {
+			utils.ResponseError(c, http.StatusBadRequest, err)
+			return nil
+		}
 		utils.ResponseError(c, http.StatusInternalServerError, err)
 		return nil
 	}
-	return c.JSON(http.StatusOK, req)
+	res := SubscriptionRes(sub)
+	return c.JSON(http.StatusOK, res)
 }
 
 // DeleteSubscription handles DELETE /subscriptions/:user_id/:service_name
@@ -162,7 +182,8 @@ func (h *subscriptionsApiHandler) TotalPrice(c echo.Context) error {
 		utils.ResponseError(c, http.StatusInternalServerError, err)
 		return nil
 	}
-	return c.JSON(http.StatusOK, map[string]int{"total": total})
+	res := TotalPriceRes{Total: total}
+	return c.JSON(http.StatusOK, res)
 }
 
 // parseYearMonth parses a string in YYYY-MM format to time.Time (first day of month)

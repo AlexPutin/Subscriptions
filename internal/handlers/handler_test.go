@@ -210,3 +210,49 @@ func TestDeleteSubscription_Error(t *testing.T) {
 	_ = h.DeleteSubscription(c)
 	assert.Equal(t, http.StatusInternalServerError, w.Code)
 }
+
+func TestCreateSubscription_ValidationError(t *testing.T) {
+	e := echo.New()
+	ms := &mockService{
+		CreateFunc: func(sub *domain.Subscription) error {
+			return errors.New("validation failed: user_id is required")
+		},
+	}
+	h := handlers.NewSubscriptionsApiHandler(ms)
+	body := map[string]interface{}{
+		"service_name": "Netflix",
+		"price":        500,
+		"start_date":   "2025-07-01T00:00:00Z",
+	}
+	b, _ := json.Marshal(body)
+	req := httptest.NewRequest(http.MethodPost, "/api/v1/subscriptions", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	w := httptest.NewRecorder()
+	c := e.NewContext(req, w)
+
+	_ = h.CreateSubscription(c)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
+
+func TestUpdateSubscription_ValidationError(t *testing.T) {
+	e := echo.New()
+	ms := &mockService{
+		UpdateFunc: func(sub *domain.Subscription) error {
+			return errors.New("validation failed: price is required")
+		},
+	}
+	h := handlers.NewSubscriptionsApiHandler(ms)
+	body := map[string]interface{}{
+		"start_date": "2025-07-01T00:00:00Z",
+	}
+	b, _ := json.Marshal(body)
+	req := httptest.NewRequest(http.MethodPut, "/api/v1/subscriptions/user1/Netflix", bytes.NewReader(b))
+	req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
+	w := httptest.NewRecorder()
+	c := e.NewContext(req, w)
+	c.SetParamNames("user_id", "service_name")
+	c.SetParamValues("user1", "Netflix")
+
+	_ = h.UpdateSubscription(c)
+	assert.Equal(t, http.StatusBadRequest, w.Code)
+}
