@@ -114,7 +114,7 @@ func TestTotalPrice(t *testing.T) {
 		},
 	}
 	h := handlers.NewSubscriptionsApiHandler(ms)
-	req := httptest.NewRequest(http.MethodGet, "/api/v1/subscriptions/total?user_id=550e8400-e29b-41d4-a716-446655440000&from=2025-01&to=2025-12", nil)
+	req := httptest.NewRequest(http.MethodGet, "/api/v1/subscriptions/total?user_id=550e8400-e29b-41d4-a716-446655440000&from=01-2025&to=12-2025", nil)
 	w := httptest.NewRecorder()
 	c := e.NewContext(req, w)
 

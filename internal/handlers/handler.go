@@ -279,5 +279,5 @@ func (h *subscriptionsApiHandler) TotalPrice(c echo.Context) error {
 
 // parseYearMonth parses a string in YYYY-MM format to time.Time (first day of month)
 func parseYearMonth(s string) (t time.Time, err error) {
-	return time.Parse("2006-01", s)
+	return time.Parse("01-2006", s)
 }
