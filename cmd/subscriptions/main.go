@@ -10,6 +10,8 @@ import (
 	"github.com/alexputin/subscriptions/internal/config"
 	"github.com/alexputin/subscriptions/internal/db"
 	"github.com/alexputin/subscriptions/internal/handlers"
+	"github.com/alexputin/subscriptions/internal/repositories"
+	"github.com/alexputin/subscriptions/internal/services"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -25,8 +27,8 @@ func main() {
 	}
 	defer db.Close()
 
-	// TODO: Create repository instances
-	// TODO: Create service instances
+	repo := repositories.NewPostgresUserSubscriptionRepository(db)
+	service := services.NewUserSubscriptionService(repo)
 
 	app := echo.New()
 
@@ -38,7 +40,7 @@ func main() {
 	app.Use(middleware.Recover())
 
 	// Register routes
-	api := handlers.NewSubscriptionsApiHandler(nil) // TODO: Replace nil with actual repository implementation
+	api := handlers.NewSubscriptionsApiHandler(service)
 	api.RegisterRoutes(app)
 
 	// Server graceful shutdown
