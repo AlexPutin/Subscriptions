@@ -1,8 +1,11 @@
 MAKEFLAGS += --silent
 
-include .env
+ifneq ("$(wildcard ./.env)","")
+    include .env
+endif
 
-DB_URL = "postgresql://$(DB_USER):$(DB_PASSWORD)@$(DB_HOSTNAMEDB_HOSTNAME):$(DB_PORT)/$(DB_NAME)?sslmode=disable"
+
+DB_URL = "postgresql://$(DB_USER):$(DB_PASSWORD)@$(DB_HOSTNAME):$(DB_PORT)/$(DB_NAME)?sslmode=disable"
 
 build:
 	go build -o ./tmp/subscriptions ./cmd/subscriptions/main.go

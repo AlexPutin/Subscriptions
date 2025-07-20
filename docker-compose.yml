@@ -1,0 +1,31 @@
+services:
+  db:
+    image: postgres:16-alpine
+    env_file:
+      - test.env
+    environment:
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    env_file:
+      - test.env
+    environment:
+      DB_HOSTNAME: db
+      DATABASE_URL: postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOSTNAME}:${DB_PORT}/${DB_NAME}?sslmode=disable
+      ENVIRONMENT: test
+    ports:
+      - "1337:3000"
+    volumes:
+      - ./migrations:/app/migrations
+      - ./docs:/app/docs
+    entrypoint: [ "/bin/sh", "-c", "dockerize -wait tcp://db:${DB_PORT} -timeout 60s make migrate-up && ./subscriptions" ]
+volumes:
+  db_data:

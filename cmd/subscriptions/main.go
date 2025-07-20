@@ -38,6 +38,8 @@ func main() {
 		app.Use(middleware.LoggerWithConfig(middleware.LoggerConfig{
 			Format: "${time_rfc3339}\t| ${status} |  ${method}\t| ${uri}\n",
 		}))
+	} else {
+		app.Use(middleware.Logger())
 	}
 	app.Use(middleware.Recover())
 
