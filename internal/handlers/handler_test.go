@@ -53,7 +53,7 @@ func TestCreateSubscription(t *testing.T) {
 			return nil
 		},
 	}
-	h := handlers.NewSubscriptionsApiHandler(ms)
+	h := handlers.NewSubscriptionsApiHandler(ms, nil)
 
 	body := map[string]interface{}{
 		"user_id":      "550e8400-e29b-41d4-a716-446655440000",
@@ -78,7 +78,7 @@ func TestGetSubscription_NotFound(t *testing.T) {
 			return nil, nil
 		},
 	}
-	h := handlers.NewSubscriptionsApiHandler(ms)
+	h := handlers.NewSubscriptionsApiHandler(ms, nil)
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/subscriptions/550e8400-e29b-41d4-a716-446655440000/Netflix", nil)
 	w := httptest.NewRecorder()
 	c := e.NewContext(req, w)
@@ -97,7 +97,7 @@ func TestListSubscriptions(t *testing.T) {
 			return []domain.Subscription{{UserID: "550e8400-e29b-41d4-a716-446655440000", ServiceName: "Netflix", Price: 500, StartDate: domain.ShortDate{Time: time.Now()}}}, nil
 		},
 	}
-	h := handlers.NewSubscriptionsApiHandler(ms)
+	h := handlers.NewSubscriptionsApiHandler(ms, nil)
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/subscriptions?user_id=550e8400-e29b-41d4-a716-446655440000", nil)
 	w := httptest.NewRecorder()
 	c := e.NewContext(req, w)
@@ -113,7 +113,7 @@ func TestTotalPrice(t *testing.T) {
 			return 1500, nil
 		},
 	}
-	h := handlers.NewSubscriptionsApiHandler(ms)
+	h := handlers.NewSubscriptionsApiHandler(ms, nil)
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/subscriptions/total?user_id=550e8400-e29b-41d4-a716-446655440000&from=01-2025&to=12-2025", nil)
 	w := httptest.NewRecorder()
 	c := e.NewContext(req, w)
@@ -132,7 +132,7 @@ func TestUpdateSubscription(t *testing.T) {
 			return nil
 		},
 	}
-	h := handlers.NewSubscriptionsApiHandler(ms)
+	h := handlers.NewSubscriptionsApiHandler(ms, nil)
 	body := map[string]interface{}{
 		"price":      600,
 		"start_date": "07-2025",
@@ -157,7 +157,7 @@ func TestUpdateSubscription_Error(t *testing.T) {
 			return errors.New("fail")
 		},
 	}
-	h := handlers.NewSubscriptionsApiHandler(ms)
+	h := handlers.NewSubscriptionsApiHandler(ms, nil)
 	body := map[string]interface{}{
 		"price":      600,
 		"start_date": "07-2025",
@@ -185,7 +185,7 @@ func TestDeleteSubscription(t *testing.T) {
 			return nil
 		},
 	}
-	h := handlers.NewSubscriptionsApiHandler(ms)
+	h := handlers.NewSubscriptionsApiHandler(ms, nil)
 	req := httptest.NewRequest(http.MethodDelete, "/api/v1/subscriptions/550e8400-e29b-41d4-a716-446655440000/Netflix", nil)
 	w := httptest.NewRecorder()
 	c := e.NewContext(req, w)
@@ -204,7 +204,7 @@ func TestDeleteSubscription_Error(t *testing.T) {
 			return errors.New("fail")
 		},
 	}
-	h := handlers.NewSubscriptionsApiHandler(ms)
+	h := handlers.NewSubscriptionsApiHandler(ms, nil)
 	req := httptest.NewRequest(http.MethodDelete, "/api/v1/subscriptions/550e8400-e29b-41d4-a716-446655440000/Netflix", nil)
 	w := httptest.NewRecorder()
 	c := e.NewContext(req, w)
@@ -223,7 +223,7 @@ func TestCreateSubscription_ValidationError(t *testing.T) {
 			return nil
 		},
 	}
-	h := handlers.NewSubscriptionsApiHandler(ms)
+	h := handlers.NewSubscriptionsApiHandler(ms, nil)
 	// Missing user_id (required)
 	body := map[string]interface{}{
 		"service_name": "Netflix",
@@ -247,7 +247,7 @@ func TestUpdateSubscription_ValidationError(t *testing.T) {
 			return nil
 		},
 	}
-	h := handlers.NewSubscriptionsApiHandler(ms)
+	h := handlers.NewSubscriptionsApiHandler(ms, nil)
 	// Missing price (required)
 	body := map[string]interface{}{
 		"start_date": "2025-07-01T00:00:00Z",
@@ -270,7 +270,7 @@ func TestTotalPrice_InvalidDateFormat(t *testing.T) {
 			return 0, nil
 		},
 	}
-	h := handlers.NewSubscriptionsApiHandler(ms)
+	h := handlers.NewSubscriptionsApiHandler(ms, nil)
 	req := httptest.NewRequest(http.MethodGet, "/api/v1/subscriptions/total?user_id=550e8400-e29b-41d4-a716-446655440000&from=2025-13&to=2025-12", nil)
 	w := httptest.NewRecorder()
 	c := e.NewContext(req, w)

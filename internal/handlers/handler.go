@@ -11,17 +11,20 @@ import (
 	"github.com/alexputin/subscriptions/internal/utils"
 	"github.com/go-playground/validator/v10"
 	"github.com/labstack/echo/v4"
+	"go.uber.org/zap"
 )
 
 type subscriptionsApiHandler struct {
 	service  domain.UserSubscriptionService
 	validate *validator.Validate
+	logger   *zap.Logger
 }
 
-func NewSubscriptionsApiHandler(service domain.UserSubscriptionService) *subscriptionsApiHandler {
+func NewSubscriptionsApiHandler(service domain.UserSubscriptionService, logger *zap.Logger) *subscriptionsApiHandler {
 	return &subscriptionsApiHandler{
 		service:  service,
 		validate: validator.New(),
+		logger:   logger,
 	}
 }
 
@@ -68,6 +71,17 @@ func (h *subscriptionsApiHandler) CreateSubscription(c echo.Context) error {
 
 	err := h.service.Create(&sub)
 	if err != nil {
+		if utils.IsErrorCode(err, utils.ErrUniqueViolation) {
+			utils.ResponseError(c, http.StatusBadRequest, fmt.Errorf("subscription already exist"))
+			return nil
+		}
+
+		if h.logger != nil {
+			h.logger.Warn("failed to create subscription",
+				zap.String("handler", "CreateSubscription"),
+				zap.Any("subscription", &sub),
+				zap.Error(err))
+		}
 		utils.ResponseError(c, http.StatusInternalServerError, err)
 		return nil
 	}
@@ -111,6 +125,14 @@ func (h *subscriptionsApiHandler) ListSubscriptions(c echo.Context) error {
 
 	subs, err := h.service.List(userID, limit, offset)
 	if err != nil {
+		if h.logger != nil {
+			h.logger.Warn("failed to get list of subscriptions",
+				zap.String("handler", "ListSubscriptions"),
+				zap.String("user_id", userID),
+				zap.Int("limit", limit),
+				zap.Int("offset", offset),
+				zap.Error(err))
+		}
 		utils.ResponseError(c, http.StatusInternalServerError, err)
 		return nil
 	}
@@ -151,6 +173,13 @@ func (h *subscriptionsApiHandler) GetSubscription(c echo.Context) error {
 	}
 	sub, err := h.service.Get(userID, serviceName)
 	if err != nil {
+		if h.logger != nil {
+			h.logger.Warn("failed to get subscription",
+				zap.String("handler", "GetSubscription"),
+				zap.String("user_id", userID),
+				zap.String("service_name", serviceName),
+				zap.Error(err))
+		}
 		utils.ResponseError(c, http.StatusInternalServerError, err)
 		return nil
 	}
@@ -203,6 +232,14 @@ func (h *subscriptionsApiHandler) UpdateSubscription(c echo.Context) error {
 
 	err := h.service.Update(&sub)
 	if err != nil {
+		if h.logger != nil {
+			h.logger.Warn("failed to update subscription",
+				zap.String("handler", "UpdateSubscription"),
+				zap.String("user_id", userID),
+				zap.String("service_name", serviceName),
+				zap.Any("subscription", &sub),
+				zap.Error(err))
+		}
 		utils.ResponseError(c, http.StatusInternalServerError, err)
 		return nil
 	}
@@ -231,6 +268,13 @@ func (h *subscriptionsApiHandler) DeleteSubscription(c echo.Context) error {
 	}
 	err := h.service.Delete(userID, serviceName)
 	if err != nil {
+		if h.logger != nil {
+			h.logger.Warn("failed to delete subscription",
+				zap.String("handler", "UpdateSubscription"),
+				zap.String("user_id", userID),
+				zap.String("service_name", serviceName),
+				zap.Error(err))
+		}
 		utils.ResponseError(c, http.StatusInternalServerError, err)
 		return nil
 	}
